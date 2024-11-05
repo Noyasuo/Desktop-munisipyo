@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 
 class DashboardScreen(tk.Frame):
     def __init__(self, master, on_logout):
@@ -38,17 +39,43 @@ class DashboardScreen(tk.Frame):
         self.show_dashboard()
 
     def show_dashboard(self):
+        """Displays the dashboard view with 'Request', 'Approved', and 'Disapproved' widgets."""
         self.clear_content_frame()
-        tk.Label(self.content_frame, text="Dashboard Screen", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
+
+        # Centering frame for the widgets
+        center_frame = tk.Frame(self.content_frame, bg="lightgrey")
+        center_frame.pack(pady=20, expand=True)
+
+        # Widget data for 'Request', 'Approved', and 'Disapproved'
+        widget_data = [
+            ("Request", "This is the request widget", self.show_request_item),
+            ("Approved", "This is the approved widget", self.show_approved),
+            ("Disapproved", "This is the disapproved widget", self.show_disapproved)
+        ]
+
+        for title, description, command in widget_data:
+            widget = tk.Frame(center_frame, bg="white", bd=2, relief="groove", padx=20, pady=20)
+            widget.pack(side="left", padx=10, pady=10)
+            tk.Label(widget, text=title, font=("Arial", 14, "bold"), bg="white").pack(pady=(0, 5))
+            tk.Label(widget, text=description, bg="white").pack()
+            widget.bind("<Button-1>", lambda e, cmd=command: cmd())
 
     def show_request_item(self):
         self.clear_content_frame()
         try:
-            from request_item import RequestItemScreen  # Import the screen from request_item.py
+            from request import RequestItemScreen  # Import the screen from request.py
             request_item_screen = RequestItemScreen(self.content_frame)
             request_item_screen.pack(fill="both", expand=True)
         except ImportError:
-            tk.Label(self.content_frame, text="Error: request_item.py not found.", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
+            tk.Label(self.content_frame, text="Error: request.py not found.", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
+
+    def show_approved(self):
+        self.clear_content_frame()
+        tk.Label(self.content_frame, text="Approved Screen", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
+
+    def show_disapproved(self):
+        self.clear_content_frame()
+        tk.Label(self.content_frame, text="Disapproved Screen", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
 
     def show_staff_accounts(self):
         self.clear_content_frame()
@@ -80,6 +107,7 @@ class DashboardScreen(tk.Frame):
     def clear_content_frame(self):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
