@@ -48,9 +48,9 @@ class DashboardScreen(tk.Frame):
 
         # Widget data for 'Request', 'Approved', and 'Disapproved'
         widget_data = [
-            ("Request", "This is the request widget", self.show_request_item),
-            ("Approved", "This is the approved widget", self.show_approved),
-            ("Disapproved", "This is the disapproved widget", self.show_disapproved)
+            ("Request", "Click to check requests", self.show_request_item),
+            ("Approved", "Click to see approved requests", self.show_approved),
+            ("Disapproved", "Click to see declined requests", self.show_disapproved)
         ]
 
         for title, description, command in widget_data:
@@ -70,12 +70,24 @@ class DashboardScreen(tk.Frame):
             tk.Label(self.content_frame, text="Error: request.py not found.", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
 
     def show_approved(self):
+        """Route to the Approved screen."""
         self.clear_content_frame()
-        tk.Label(self.content_frame, text="Approved Screen", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
+        try:
+            from approved import ApprovedScreen  # Import the ApprovedScreen
+            approved_screen = ApprovedScreen(self.content_frame)  # Create the ApprovedScreen widget
+            approved_screen.pack(fill="both", expand=True)  # Pack it to the content frame
+        except ImportError:
+            tk.Label(self.content_frame, text="Error: approved.py not found.", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
 
     def show_disapproved(self):
+        """Route to the Disapproved screen."""
         self.clear_content_frame()
-        tk.Label(self.content_frame, text="Disapproved Screen", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
+        try:
+            from disapproved import DisapprovedScreen  # Import the DisapprovedScreen
+            disapproved_screen = DisapprovedScreen(self.content_frame)  # Create the DisapprovedScreen widget
+            disapproved_screen.pack(fill="both", expand=True)  # Pack it to the content frame
+        except ImportError:
+            tk.Label(self.content_frame, text="Error: disapproved.py not found.", bg="lightgrey", font=("Arial", 16)).pack(expand=True)
 
     def show_staff_accounts(self):
         self.clear_content_frame()
