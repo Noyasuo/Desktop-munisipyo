@@ -1,5 +1,10 @@
 import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
+import requests
+
+from token_utils import save_token, get_token
+
+TOKEN = get_token()
 
 class LoginScreen(tk.Frame):
     def __init__(self, master=None, on_login_success=None):
@@ -104,12 +109,41 @@ class LoginScreen(tk.Frame):
 
         # Ensure both username and password are filled
         if username and password:
-            print(f"Login successful! Welcome, {username}")
-            if self.on_login_success:
-                self.on_login_success(username)  # Pass the username to the success function
+            # Define the payload with username and password
+            payload = {
+                'username': username,
+                'password': password
+            }
+
+            # Send a POST request to the login endpoint
+            try:
+                response = requests.post("http://127.0.0.1:8000/api/login/", json=payload)
+                
+                # Check if login was successful
+                if response.status_code == 200:
+                    response_data = response.json()
+                    
+                    # Extract token, user_type, and message from response
+                    token = response_data.get("token")
+                    user_type = response_data.get("user_type")
+                    message = response_data.get("message")
+                    
+                    # Print login message
+                    print(message)
+
+                    # Check if user_type is procurement_admin
+                    if user_type == "municipal_admin":
+                        self.on_login_success(username)
+                        save_token(token=token, username=username)
+                    else:
+                        print(f"User is a {user_type}. Access level may vary.")
+
+                else:
+                    print("Login failed! Invalid credentials or server error.")
+            except requests.exceptions.RequestException as e:
+                print(f"An error occurred: {e}")
         else:
             print("Login failed! Please enter valid credentials.")
-
     def round_rectangle(self, x1, y1, x2, y2, radius=50, **kwargs):
         """Draw a rounded rectangle on the canvas."""
         points = [x1 + radius, y1,

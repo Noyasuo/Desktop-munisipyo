@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox
+import requests
+from login import TOKEN
+
 
 class SupplierSaleScreen(tk.Frame):
     def __init__(self, master):
@@ -56,28 +59,52 @@ class SupplierSaleScreen(tk.Frame):
         self.populate_table()
 
     def populate_table(self):
-        """Populate the table with example merchandise data."""
-        # Example merchandise data (You can replace this with dynamic data from your database or API)
-        example_data = [
-            ("Product A", "path_to_image_A.png", "Product A", "Description of Product A", "Category 1", "$20", "50"),
-            ("Product B", "path_to_image_B.png", "Product B", "Description of Product B", "Category 2", "$25", "30"),
-            ("Product C", "path_to_image_C.png", "Product C", "Description of Product C", "Category 3", "$30", "20"),
-        ]
+        """Fetch product data from the API and populate the table."""
+        url = "http://127.0.0.1:8000/api/products/"
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Token {TOKEN}'
+        }
 
-        for item in example_data:
-            name, img_path, product, description, category, price, quantity = item
+        try:
+            response = requests.get(url, headers=headers)
+            
+            # Check if the request was successful
+            if response.status_code == 200:
+                products_data = response.json()
+                
+                # Clear existing entries in the table
+                for item in self.tree.get_children():
+                    self.tree.delete(item)
 
-            # Load image using PIL (Python Imaging Library)
-            try:
-                img = Image.open(img_path)
-                img = img.resize((50, 50))  # Resize the image to fit in the table
-                img = ImageTk.PhotoImage(img)
-            except Exception as e:
-                img = None
-                print(f"Error loading image: {e}")
-
-            # Insert the merchandise data into the table
-            self.tree.insert("", "end", values=(name, img, product, description, category, price, quantity))
+                # Insert each product into the table
+                for product in products_data:
+                    name = product["title"]
+                    img_path = product["image"]  # Assuming you want to display the image (could be null)
+                    description = product["description"]
+                    category = product["category"]["name"]  # Category name from nested JSON
+                    price = f"${product['price']}"
+                    quantity = product["stock"]
+                    
+                    # Handle image (if available)
+                    img = None
+                    if img_path:
+                        try:
+                            img = Image.open(img_path)  # Open the image if the path is available
+                            img = img.resize((50, 50))  # Resize the image to fit in the table
+                            img = ImageTk.PhotoImage(img)
+                        except Exception as e:
+                            print(f"Error loading image: {e}")
+                    
+                    # Insert the product data into the table
+                    self.tree.insert("", "end", values=(name, img, name, description, category, price, quantity))
+                
+                print("Table populated successfully.")
+            else:
+                print(f"Failed to retrieve data: {response.status_code}")
+        
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
 
     def on_item_selected(self, event):
         """Handle item selection in the Treeview."""

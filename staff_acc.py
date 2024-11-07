@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import requests
+from login import TOKEN
 
 class StaffAccScreen(tk.Frame):
     def __init__(self, master):
@@ -7,6 +9,7 @@ class StaffAccScreen(tk.Frame):
         self.master = master
         self.create_style()  # Create custom styles
         self.create_widgets()
+        self.token = "8a4a2dd557f121b3fd7c3999f59b4604d49069ae" 
 
     def create_style(self):
         """Create a custom style for the Treeview."""
@@ -64,15 +67,46 @@ class StaffAccScreen(tk.Frame):
         delete_button.pack(side="left", padx=10)
 
     def populate_table(self):
-        """Populate the table with example data."""
-        example_data = [
-            ("John Doe", "john@example.com", "123 Main St", "555-1234", "001", "Manager", "jdoe", "password123"),
-            ("Jane Smith", "jane@example.com", "456 Elm St", "555-5678", "002", "Staff", "jsmith", "password456"),
-            ("Alice Johnson", "alice@example.com", "789 Pine St", "555-8765", "003", "Staff", "ajohnson", "password789"),
-        ]
+        """Fetch account data from the API and populate the table."""
+        url = "http://127.0.0.1:8000/api/accounts/"
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Token {TOKEN}'
+        }
 
-        for item in example_data:
-            self.tree.insert("", "end", values=item)
+        try:
+            response = requests.get(url, headers=headers)
+            
+            # Check if the request was successful
+            if response.status_code == 200:
+                accounts_data = response.json()
+                
+                # Clear existing entries in the treeview
+                for item in self.tree.get_children():
+                    self.tree.delete(item)
+
+                # Insert each account into the treeview
+                for account in accounts_data:
+                    # Extract values you want to display in the table
+                    if account["position"] == "dean" or account["position"] == "head":
+                        row = (
+                            account["first_name"] + " " + account["last_name"],
+                            account["email"],
+                            account["address"],
+                            account["contact_number"],
+                            account["id_number"],
+                            account["position"],  # Example field for superuser status
+                            account["first_name"],
+                            "********"
+                        )
+                        self.tree.insert("", "end", values=row)
+                
+                print("Table populated successfully.")
+            else:
+                print(f"Failed to retrieve data: {response.status_code}")
+        
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
 
     def edit_account(self):
         """Edit the selected account with the entire row shown in one dialog."""

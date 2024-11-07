@@ -1,5 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+import requests
+from tkinter import messagebox
+from login import TOKEN
+
 
 class DisapprovedScreen(tk.Frame):
     def __init__(self, master):
@@ -46,14 +50,49 @@ class DisapprovedScreen(tk.Frame):
         scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscroll=scrollbar.set)
 
+        self.populate_table()
+
         # Pack the Treeview and scrollbar
         self.tree.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
     def populate_table(self):
-        """Populate the table with dynamic data (Currently empty)."""
-        # This function can later be used to populate the table with data if needed
-        pass
+        """Populate the table with order data from the API."""
+        url = "http://127.0.0.1:8000/api/orders/"
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Token {TOKEN}'  # Replace with your actual token
+        }
+        
+        try:
+            # Make the GET request to the API
+            response = requests.get(url, headers=headers)
+            
+            # Check if the request was successful
+            if response.status_code == 200:
+                data = response.json()  # Parse the JSON response
+                
+                for order in data:
+                    if not order['status'] == 'rejected':
+                        continue
+                    # Extract relevant data from the order object
+                    user_name = order['user']['username']  # Assuming 'user' is an ID or object, you can modify this to fetch user details
+                    user_email = order['user']['email']  # Same as above, replace with actual user email if nested
+                    request_date = order['request_date']
+                    quantity = order['quantity']
+                    status = order['status']
+                    # Assuming product is an array (multiple products in an order)
+                    product_names = ', '.join([product['title'] for product in order['product']])
+                    product_prices = ', '.join([str(product['price']) for product in order['product']])
+
+                    # Insert data into the table
+                    self.tree.insert("", "end", values=(user_name, user_email, request_date, quantity, f"${product_prices}", product_names, status))
+            else:
+                # If the request fails, show an error message
+                messagebox.showerror("Error", "Failed to retrieve orders data.")
+        except Exception as e:
+            # If any exception occurs, show an error message
+            messagebox.showerror("Error", f"An error occurred: {e}")
 
 # To test the DisapprovedScreen independently, you can create a root window and add it to this script.
 if __name__ == "__main__":

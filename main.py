@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 from login import LoginScreen  # Ensure LoginScreen is implemented and takes a callback for login success
+import os
 
 class Header(tk.Frame):
     def __init__(self, master=None):
@@ -50,6 +51,7 @@ class MainApplication(tk.Tk):
         self.geometry("800x600")
         self.configure(bg="grey")
         self.state('zoomed')
+        self.TOKEN_FILE_PATH = "token.txt"
 
         # Header with logo and title
         self.header = Header(self)
@@ -83,6 +85,16 @@ class MainApplication(tk.Tk):
         dashboard_screen.pack(expand=True, fill="both")
 
     def logout(self):
+        """Logs the user out by deleting the token file."""
+        try:
+            if os.path.exists(self.TOKEN_FILE_PATH):
+                os.remove(self.TOKEN_FILE_PATH)
+                print("Logged out successfully. Token deleted.")
+            else:
+                print("No token found. Already logged out.")
+        except Exception as e:
+            print(f"Error logging out: {e}")
+
         """Logs the user out by returning to the login screen and clearing user info."""
         if self.header.user_frame:
             self.header.user_frame.destroy()

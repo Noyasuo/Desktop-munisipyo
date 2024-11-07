@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import requests
+from login import TOKEN
+
 
 class SupplierAccScreen(tk.Frame):
     def __init__(self, master):
@@ -64,15 +67,44 @@ class SupplierAccScreen(tk.Frame):
         delete_button.pack(side="left", padx=10)
 
     def populate_table(self):
-        """Populate the table with example data."""
-        example_data = [
-            ("Supplier A", "supplierA@example.com", "123 ABC St", "ID12345", "555-1234", "Permit001"),
-            ("Supplier B", "supplierB@example.com", "456 DEF St", "ID67890", "555-5678", "Permit002"),
-            ("Supplier C", "supplierC@example.com", "789 GHI St", "ID54321", "555-8765", "Permit003"),
-        ]
+        """Fetch account data from the API and populate the table."""
+        url = "http://127.0.0.1:8000/api/accounts/"
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Token {TOKEN}'
+        }
 
-        for item in example_data:
-            self.tree.insert("", "end", values=item)
+        try:
+            response = requests.get(url, headers=headers)
+            
+            # Check if the request was successful
+            if response.status_code == 200:
+                accounts_data = response.json()
+                
+                # Clear existing entries in the treeview
+                for item in self.tree.get_children():
+                    self.tree.delete(item)
+
+                # Insert each account into the treeview
+                for account in accounts_data:
+                    # Extract values you want to display in the table
+                    if account["user_type"] == "supplier":
+                        row = (
+                            account["first_name"] + " " + account["last_name"],
+                            account["email"],
+                            account["address"],
+                            account["id_number"],
+                            account["contact_number"],
+                            account["business_permit"],
+                        )
+                        self.tree.insert("", "end", values=row)
+                
+                print("Table populated successfully.")
+            else:
+                print(f"Failed to retrieve data: {response.status_code}")
+        
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
 
     def edit_account(self):
         """Edit the selected supplier account with the entire row shown in one dialog."""
@@ -106,6 +138,7 @@ class SupplierAccScreen(tk.Frame):
         # Save changes and update the Treeview item
         def save_changes():
             new_values = [entry.get() for entry in entry_widgets]
+            print(new_values)
             self.tree.item(selected_item, values=new_values)  # Update Treeview with new values
             messagebox.showinfo("Success", "Supplier account details updated successfully.")
             edit_window.destroy()

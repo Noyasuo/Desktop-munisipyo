@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
+import requests
+from tkinter import messagebox
+from login import TOKEN
 
 class RequestItemScreen(tk.Frame):
     def __init__(self, master=None):
@@ -30,11 +33,12 @@ class RequestItemScreen(tk.Frame):
         self.table = ttk.Treeview(
             table_frame,
             style="Custom.Treeview",
-            columns=("name", "email", "request_date", "quantity", "price", "product"),
+            columns=("request_id","name", "email", "request_date", "quantity", "price", "product"),
             show="headings"
         )
 
         # Define headings and column widths
+        self.table.heading("request_id", text="Request Id")
         self.table.heading("name", text="Name")
         self.table.heading("email", text="Email")
         self.table.heading("request_date", text="Request Date")
@@ -75,17 +79,43 @@ class RequestItemScreen(tk.Frame):
         self.confirm_button = None
 
     def populate_table(self):
-        """Populates the table with sample data."""
-        sample_data = [
-            ("Alice Johnson", "alice@example.com", "2024-01-01", 10, "$100", "Product A"),
-            ("Bob Smith", "bob@example.com", "2024-01-05", 5, "$50", "Product B"),
-            ("Carol White", "carol@example.com", "2024-01-10", 7, "$70", "Product C"),
-            ("Dave Lee", "dave@example.com", "2024-01-12", 3, "$30", "Product D"),
-            ("Eve Adams", "eve@example.com", "2024-01-15", 2, "$20", "Product E"),
-        ]
+        """Populate the table with order data from the API."""
+        url = "http://127.0.0.1:8000/api/orders/"
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Token {TOKEN}'  # Replace with your actual token
+        }
+        
+        try:
+            # Make the GET request to the API
+            response = requests.get(url, headers=headers)
+            
+            # Check if the request was successful
+            if response.status_code == 200:
+                data = response.json()  # Parse the JSON response
+                
+                for order in data:
+                    if not order['status'] == 'pending':
+                        continue
+                    # Extract relevant data from the order object
+                    request_id = order['id']
+                    user_name = order['user']['username']  # Assuming 'user' is an ID or object, you can modify this to fetch user details
+                    user_email = order['user']['email']  # Same as above, replace with actual user email if nested
+                    request_date = order['request_date']
+                    quantity = order['quantity']
+                    status = order['status']
+                    # Assuming product is an array (multiple products in an order)
+                    product_names = ', '.join([product['title'] for product in order['product']])
+                    product_prices = ', '.join([str(product['price']) for product in order['product']])
 
-        for row in sample_data:
-            self.table.insert("", "end", values=row)
+                    # Insert data into the table
+                    self.table.insert("", "end", values=(request_id, user_name, user_email, request_date, quantity, f"${product_prices}", product_names, status))
+            else:
+                # If the request fails, show an error message
+                messagebox.showerror("Error", "Failed to retrieve orders data.")
+        except Exception as e:
+            # If any exception occurs, show an error message
+            messagebox.showerror("Error", f"An error occurred: {e}")
 
     def prepare_signature(self, status):
         """Displays the signature canvas and confirm button based on the action."""
@@ -122,8 +152,11 @@ class RequestItemScreen(tk.Frame):
         selected_item = self.table.selection()
         if selected_item:
             item_data = self.table.item(selected_item)["values"]
-            print(f"{status}: {item_data}")  # Print the request status and selected item data
-
+            print(f"{status}: {item_data}")
+            if status.lower() == "approved":
+                self.update_order(order_id=item_data[0], status=status.lower())
+            else:
+                self.update_order(order_id=item_data[0], status='rejected')
             # You can add logic here to store the request status and signature as needed
 
         # Reset the UI after submission
@@ -132,6 +165,37 @@ class RequestItemScreen(tk.Frame):
 
         self.signature_canvas = None
         self.confirm_button = None
+
+    def update_order(self, order_id, status):
+        API_URL = "http://127.0.0.1:8000/api/order/" 
+        # Get the entered values
+
+        if not order_id or not status:
+            messagebox.showwarning("Input Error", "Please fill in both fields.")
+            return
+
+        # Prepare the data for the request
+        headers = {
+            'Authorization': f'Token {TOKEN}',
+            'Content-Type': 'application/json'
+        }
+
+        # Data to update
+        data = {
+            "status": status,
+        }
+
+        try:
+            # Send PUT request to update the order
+            response = requests.put(f"{API_URL}{order_id}/", headers=headers, json=data)
+
+            # Check if request was successful
+            if response.status_code == 200:
+                messagebox.showinfo("Success", "Order updated successfully.")
+            else:
+                messagebox.showerror("Error", f"Failed to update order: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
 
 # To test the RequestItemScreen independently, you can create a root window and add it to this script.
 if __name__ == "__main__":
