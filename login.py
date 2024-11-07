@@ -3,6 +3,7 @@ from PIL import Image, ImageTk, ImageDraw
 import requests
 
 from token_utils import save_token, get_token
+from dashboard_procurement.dashboard import DashboardScreen
 
 TOKEN = get_token()
 
@@ -106,7 +107,7 @@ class LoginScreen(tk.Frame):
         # Get the entered username and password
         username = self.username_entry.get()
         password = self.password_entry.get()
-
+        
         # Ensure both username and password are filled
         if username and password:
             # Define the payload with username and password
@@ -131,12 +132,23 @@ class LoginScreen(tk.Frame):
                     # Print login message
                     print(message)
 
+                    print(user_type)
                     # Check if user_type is procurement_admin
                     if user_type == "municipal_admin":
                         self.on_login_success(username)
                         save_token(token=token, username=username)
-                    else:
-                        print(f"User is a {user_type}. Access level may vary.")
+                    elif user_type == "procurement_admin":
+                        for widget in self.master.winfo_children():
+                            widget.destroy()
+                        
+                        # Display the user's information in the header
+                        self.master.master.header.create_user_info(username)
+
+                        # Load and display the DashboardScreen
+                    
+                        dashboard_screen = DashboardScreen(self.master, self.master.master.logout)
+                        dashboard_screen.pack(expand=True, fill="both")
+                        save_token(token=token, username=username)
 
                 else:
                     print("Login failed! Invalid credentials or server error.")

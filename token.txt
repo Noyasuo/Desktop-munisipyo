@@ -1,2 +1,0 @@
-token=8a4a2dd557f121b3fd7c3999f59b4604d49069ae
-username=mp_admin
