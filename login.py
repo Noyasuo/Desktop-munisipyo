@@ -4,6 +4,7 @@ import requests
 
 from token_utils import save_token, get_token
 from dashboard_procurement.dashboard import DashboardScreen
+from dashboard_supplier.dashboard import DashboardScreen as DashboardScreenSupplier
 
 TOKEN = get_token()
 
@@ -32,7 +33,7 @@ class LoginScreen(tk.Frame):
             print("Error: Image file not found. Please check the image path.")
 
         # Add the "Login" label on the canvas
-        self.canvas.create_text(250, 170, text="Admin Munisipyo", font=("Arial", 18), fill="white")  # Adjusted position
+        self.canvas.create_text(250, 170, text="Admin Login", font=("Arial", 18), fill="white")  # Adjusted position
 
         # Create entry frames for username and password with increased spacing
         self.create_entry_with_icon("Username", "assets/user.png", 240)  # Store username entry
@@ -137,18 +138,24 @@ class LoginScreen(tk.Frame):
                     if user_type == "municipal_admin":
                         self.on_login_success(username)
                         save_token(token=token, username=username)
-                    elif user_type == "procurement_admin":
+                    else:
                         for widget in self.master.winfo_children():
                             widget.destroy()
-                        
+                            
                         # Display the user's information in the header
                         self.master.master.header.create_user_info(username)
 
-                        # Load and display the DashboardScreen
-                    
-                        dashboard_screen = DashboardScreen(self.master, self.master.master.logout)
-                        dashboard_screen.pack(expand=True, fill="both")
-                        save_token(token=token, username=username)
+                        if user_type == "procurement_admin":
+                            # Load and display the DashboardScreen
+                            dashboard_screen = DashboardScreen(self.master, self.master.master.logout)
+                            dashboard_screen.pack(expand=True, fill="both")
+                            save_token(token=token, username=username)
+
+                        elif user_type == "supplier":
+                            dashboard_screen = DashboardScreenSupplier(self.master)
+                            dashboard_screen.pack(expand=True, fill="both")
+                            save_token(token=token, username=username)
+                        
 
                 else:
                     print("Login failed! Invalid credentials or server error.")

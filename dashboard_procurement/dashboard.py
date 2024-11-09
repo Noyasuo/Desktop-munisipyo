@@ -124,7 +124,7 @@ class DashboardScreen(tk.Frame):
         insert_inventory_screen.pack(fill="both", expand=True)
 
     def view_inventory(self):
-        from view_inventory import ViewInventoryScreen
+        from .view_inventory import ViewInventoryScreen
         self.clear_content_frame()
         view_inventory_screen = ViewInventoryScreen(self.content_frame)
         view_inventory_screen.pack(fill="both", expand=True)

@@ -75,20 +75,20 @@ class ApprovedScreen(tk.Frame):
                 data = response.json()  # Parse the JSON response
                 
                 for order in data:
-                    if not order['status'] == 'approved':
-                        continue
-                    # Extract relevant data from the order object
-                    user_name = order['user']['username']  # Assuming 'user' is an ID or object, you can modify this to fetch user details
-                    user_email = order['user']['email']  # Same as above, replace with actual user email if nested
-                    request_date = order['request_date']
-                    quantity = order['quantity']
-                    status = order['status']
-                    # Assuming product is an array (multiple products in an order)
-                    product_names = ', '.join([product['title'] for product in order['product']])
-                    product_prices = ', '.join([str(product['price']) for product in order['product']])
+                    if order['final_status'] == 'approved':
 
-                    # Insert data into the table
-                    self.tree.insert("", "end", values=(user_name, user_email, request_date, quantity, f"${product_prices}", product_names, status))
+                        # Extract relevant data from the order object
+                        user_name = order['user']['username']  # Assuming 'user' is an ID or object, you can modify this to fetch user details
+                        user_email = order['user']['email']  # Same as above, replace with actual user email if nested
+                        request_date = order['request_date']
+                        quantity = order['quantity']
+                        status = order['status']
+                        # Assuming product is an array (multiple products in an order)
+                        product_names = ', '.join([product['title'] for product in order['product']])
+                        product_prices = ', '.join([str(product['price']) for product in order['product']])
+
+                        # Insert data into the table
+                        self.tree.insert("", "end", values=(user_name, user_email, request_date, quantity, f"${product_prices}", product_names, status))
             else:
                 # If the request fails, show an error message
                 messagebox.showerror("Error", "Failed to retrieve orders data.")
