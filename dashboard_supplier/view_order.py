@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import requests
+from token_utils import get_username
 
 class ViewOrderScreen(tk.Frame):
     def __init__(self, master=None):
@@ -91,10 +92,9 @@ class ViewOrderScreen(tk.Frame):
                 data = response.json()  # Parse the JSON response
                 
                 for order in data:
-                    if  order['status'] == 'approved':
+                    if  order['status'] == 'approved' and get_username() == order['user']['username'] :
                         # Extract relevant data from the order object
                         request_id = order['id']
-                        user_name = order['user']['username']  # Assuming 'user' is an ID or object, you can modify this to fetch user details
                         user_email = order['user']['email']  # Same as above, replace with actual user email if nested
                         invoice_num = order['invoice_number']
                         product_names = ', '.join([product['title'] for product in order['product']])
@@ -105,7 +105,7 @@ class ViewOrderScreen(tk.Frame):
                         product_prices = order['total']
 
                         # Insert data into the table
-                        self.table.insert("", "end", values=(request_id, user_name, invoice_num, product_names, user_email, quantity, request_date, f"${product_prices}", status))
+                        self.table.insert("", "end", values=(request_id, get_username(), invoice_num, product_names, user_email, quantity, request_date, f"${product_prices}", status))
             else:
                 # If the request fails, show an error message
                 messagebox.showerror("Error", "Failed to retrieve orders data.")

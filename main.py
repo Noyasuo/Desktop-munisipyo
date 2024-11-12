@@ -3,6 +3,8 @@ from PIL import Image, ImageTk
 from login import LoginScreen  # Ensure LoginScreen is implemented and takes a callback for login success
 import os
 
+BACKEND_URL = ""
+
 class Header(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master, bg="#397D49")

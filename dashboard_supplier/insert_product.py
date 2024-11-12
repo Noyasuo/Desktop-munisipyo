@@ -22,8 +22,7 @@ class InsertProductScreen(tk.Frame):
         # Product Title
         self.add_label_and_entry(card_frame, "Product Title:", 1)
 
-        # Categories (Dropdown)
-        self.add_label_and_dropdown(card_frame, "Categories:", 2)
+        self.add_label_and_entry(card_frame, "Barcode:", 2)
 
         # Product Image field (Only Product Image 1 remains)
         self.add_image_field(card_frame, "Product Image:", 3)
@@ -116,22 +115,22 @@ class InsertProductScreen(tk.Frame):
         from login import TOKEN
         """Handle product submission logic."""
         title = self.get_value_from_entry(0)
+        barcode = self.get_value_from_entry(1)
         description = self.get_value_from_entry(3)
+
         
         # Validate price and stock fields to ensure they are numbers
         try:
-            price = float(self.get_value_from_entry(1))
+            price = float(self.get_value_from_entry(2))
         except ValueError:
             messagebox.showerror("Error", "Please enter a valid number for price.")
             return
 
         try:
-            stock = int(self.get_value_from_entry(3))
+            stock = int(self.get_value_from_entry(4))
         except ValueError:
             messagebox.showerror("Error", "Please enter a valid integer for stock.")
             return
-        
-        category = self.get_value_from_dropdown(0)
 
         # Retrieve the stored image file path (not the button text)
         image_path = getattr(self, 'image_file_path', None)
@@ -142,10 +141,11 @@ class InsertProductScreen(tk.Frame):
         # Prepare the data to send to the API as JSON
         product_data = {
             "title": title,
+            "barcode": barcode,
             "description": description,
             "price": price,
             "stock": stock,
-            "category": {"name": category, "description": "Product Category Description"},
+            "category": {"name": "Test", "description": "Product Category Description"},
         }
         
         # Prepare the image file
@@ -156,7 +156,6 @@ class InsertProductScreen(tk.Frame):
                 # Set up the headers, including the token and CSRF token
                 headers = {
                     'Authorization': f'Token {TOKEN}',
-                    'X-CSRFTOKEN': 'AB7rSBOVdaWHhMA8cWxhs9iV948uOZK9lsQNmeYzxSQ1PvHYrLTTGQ4zKIuhTP61',
                 }
 
                 # Make the POST request to the API with JSON data and image file
