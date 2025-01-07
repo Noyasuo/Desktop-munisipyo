@@ -1,4 +1,7 @@
 import tkinter as tk
+from tkinter import ttk
+from PIL import Image, ImageTk
+import os
 from .list import ListScreen  # Import ListScreen from list.py
 from .reports import ReportsScreen  # Import ReportsScreen from reports.py
 
@@ -32,9 +35,21 @@ class DashboardScreen(tk.Frame):
             btn = tk.Button(self.sidebar_frame, text=item, command=command)
             btn.pack(fill='x', padx=10, pady=3)
 
-        # Main content area
+        # Main content area with background image
         self.content_frame = tk.Frame(self, bg="lightgrey")
         self.content_frame.pack(side="right", expand=True, fill="both")
+
+        # Load and display the background image
+        self.canvas = tk.Canvas(self.content_frame, bg="lightgrey")
+        self.canvas.pack(fill="both", expand=True)
+        image_path = "assets/home.png"
+        if os.path.exists(image_path):
+            self.bg_image = Image.open(image_path)
+            self.bg_image = self.bg_image.resize((self.master.winfo_width(), self.master.winfo_height()), Image.LANCZOS)
+            self.bg_image = ImageTk.PhotoImage(self.bg_image)
+            self.canvas.create_image(0, 0, anchor="nw", image=self.bg_image)
+        else:
+            self.canvas.create_text(400, 300, text="Background image not found", font=("Arial", 24), fill="red")
 
         # Initialize with the dashboard view
         self.show_dashboard()

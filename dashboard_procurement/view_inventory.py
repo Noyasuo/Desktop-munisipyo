@@ -1,6 +1,7 @@
 import tkinter as tk
-from PIL import Image, ImageTk
+from tkinter import ttk
 import requests
+from login import TOKEN
 
 class ViewInventoryScreen(tk.Frame):
     def __init__(self, master):
@@ -13,72 +14,70 @@ class ViewInventoryScreen(tk.Frame):
     def create_widgets(self):
         tk.Label(self, text="View Inventory", font=("Arial", 16), bg="lightgrey").pack(pady=20)
         
-        gallery_frame = tk.Frame(self, bg="lightgrey")
-        gallery_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        # Create a frame for the table
+        table_frame = tk.Frame(self, bg="lightgrey")
+        table_frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+        # Table (Treeview widget) with custom style
+        self.table = ttk.Treeview(
+            table_frame,
+            columns=("item", "stock", "category", "barcode"),
+            show="headings"
+        )
+
+        # Define headings and column widths
+        self.table.heading("item", text="Item")
+        self.table.heading("stock", text="Stock")
+        self.table.heading("category", text="Category")
+        self.table.heading("barcode", text="Barcode")
+
+        self.table.column("item", width=180)
+        self.table.column("stock", width=70, anchor="center")
+        self.table.column("category", width=120)
+        self.table.column("barcode", width=120)
+
+        # Add vertical scrollbar for the table
+        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.table.yview)
+        self.table.configure(yscroll=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+
+        # Pack the table into the frame
+        self.table.pack(fill="both", expand=True)
 
         # Fetching data from API
         inventory_data = self.fetch_inventory_data()
 
-        # Number of columns for displaying product cards
-        columns = 10  # Adjust as per your desired grid size
-
-        # Display each product in the gallery in a grid layout
-        for index, product in enumerate(inventory_data):
-            row = index // columns
-            col = index % columns
-            self.add_product_card(gallery_frame, product).grid(row=row, column=col, padx=10, pady=10, sticky="n")
+        # Populate the table with inventory data
+        self.populate_table(inventory_data)
 
     def fetch_inventory_data(self):
-        url = 'http://127.0.0.1:8000/api/products/'
-        headers = {'Authorization': 'Token 9cf71eb2aa85c9b8f7786d7b3df15a5e017521ef'}
+        url = 'http://52.62.183.28/api/products/'
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Token {TOKEN}'
+        }
         
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code == 200:
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()  # Raise an exception for HTTP errors
             return response.json()  # Returns the list of products
-        else:
-            print("Error fetching data")
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data: {e}")
             return []
 
-    def add_product_card(self, frame, product):
-        card = tk.Frame(frame, bg="white", relief="solid", bd=2, width=200, height=250)
-        
-        # Title
-        title = tk.Label(card, text=product.get("title", "No Title"), font=("Arial", 12), wraplength=180)
-        title.pack(pady=10)
+    def populate_table(self, inventory_data):
+        for product in inventory_data:
+            item = product.get("title", "No Title")
+            stock = product.get("stock", "N/A")
+            category = product.get("category", {}).get("name", "No Category")
+            barcode = product.get("barcode", "N/A")
 
-        # Price
-        price = tk.Label(card, text=f"Price: P{product.get('price', 'N/A')}", font=("Arial", 10))
-        price.pack(pady=5)
+            # Insert data into the table
+            self.table.insert("", "end", values=(item, stock, category, barcode))
 
-        # Stock
-        stock = tk.Label(card, text=f"Stock: {product.get('stock', 'N/A')}", font=("Arial", 10))
-        stock.pack(pady=5)
-
-        # Category
-        category = tk.Label(card, text=f"Category: {product.get('category', {}).get('name', 'No Category')}", font=("Arial", 10))
-        category.pack(pady=5)
-
-        # Image
-        image_url = product.get('image')
-        if image_url:
-            try:
-                # Download image using Pillow
-                img_response = requests.get(image_url)
-                img_response.raise_for_status()  # Raise exception for bad responses
-
-                # Open image using Pillow
-                image = Image.open(img_response.raw)
-                photo = ImageTk.PhotoImage(image)
-                image_label = tk.Label(card, image=photo)
-                image_label.image = photo  # Keep a reference to the image
-                image_label.pack(pady=5)
-            except Exception as e:
-                print(f"Error loading image: {e}")
-                image_label = tk.Label(card, text="Image Unavailable", font=("Arial", 8))
-                image_label.pack(pady=5)
-        else:
-            image_label = tk.Label(card, text="No Image", font=("Arial", 8))
-            image_label.pack(pady=5)
-
-        return card
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.geometry("800x600")  # Adjust the window size to accommodate the table
+    app = ViewInventoryScreen(master=root)
+    app.pack(fill="both", expand=True)
+    root.mainloop()

@@ -45,16 +45,6 @@ class StaffAccountsScreen(tk.Frame):
         # Example data for the table, including password
         self.populate_table()
 
-        # Buttons for Edit and Delete actions
-        button_frame = tk.Frame(self)
-        button_frame.pack(pady=10)
-
-        edit_button = tk.Button(button_frame, text="Edit", command=self.edit_account, bg="green", fg="white", font=("Arial", 12), relief="solid", borderwidth=1)
-        edit_button.pack(side="left", padx=10)
-
-        delete_button = tk.Button(button_frame, text="Delete", command=self.delete_account, bg="red", fg="white", font=("Arial", 12), relief="solid", borderwidth=1)
-        delete_button.pack(side="left", padx=10)
-
     def populate_table(self):
         """Fetch account data from the API and populate the table."""
         url = "http://52.62.183.28/api/accounts/"
@@ -96,55 +86,6 @@ class StaffAccountsScreen(tk.Frame):
         
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
-
-    def edit_account(self):
-        """Edit the selected account with the entire row shown in one dialog."""
-        selected_item = self.tree.selection()
-        if not selected_item:
-            messagebox.showwarning("No selection", "Please select an account to edit.")
-            return
-
-        # Get current values of the selected row
-        item_values = self.tree.item(selected_item)["values"]
-
-        # Create an edit window
-        edit_window = tk.Toplevel(self)
-        edit_window.title("Edit Account")
-        edit_window.geometry("400x300")
-
-        # Store new entry widgets to retrieve updated values
-        entry_widgets = []
-
-        # Define field names for easy reference
-        fields = ["Name", "Email", "Address", "Contact", "ID No.", "Position", "Username", "Password"]
-
-        # Create entry fields for each column
-        for i, field in enumerate(fields):
-            tk.Label(edit_window, text=field, font=("Arial", 10)).grid(row=i, column=0, padx=10, pady=5, sticky="e")
-            entry = tk.Entry(edit_window, font=("Arial", 10))
-            entry.insert(0, item_values[i])  # Populate with current value
-            entry.grid(row=i, column=1, padx=10, pady=5)
-            entry_widgets.append(entry)
-
-        # Save changes and update the Treeview item
-        def save_changes():
-            new_values = [entry.get() for entry in entry_widgets]
-            self.tree.item(selected_item, values=new_values)  # Update Treeview with new values
-            messagebox.showinfo("Success", "Account details updated successfully.")
-            edit_window.destroy()
-
-        # Save button with green color
-        save_button = tk.Button(edit_window, text="Save", command=save_changes, bg="green", fg="white", font=("Arial", 12), relief="solid", borderwidth=1)
-        save_button.grid(row=len(fields), column=0, columnspan=2, pady=10)
-
-    def delete_account(self):
-        """Delete the selected account."""
-        selected_item = self.tree.selection()
-        if selected_item:
-            self.tree.delete(selected_item)
-            messagebox.showinfo("Account Deleted", "The selected account has been deleted.")
-        else:
-            messagebox.showwarning("No Selection", "Please select an account to delete.")
 
 # Sample usage to test the StaffAccountsScreen independently
 if __name__ == "__main__":

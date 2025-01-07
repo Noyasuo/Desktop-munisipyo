@@ -58,7 +58,7 @@ class DisapprovedScreen(tk.Frame):
 
     def populate_table(self):
         """Populate the table with order data from the API."""
-        url = "http://127.0.0.1:8000/api/orders/"
+        url = "http://52.62.183.28/api/orders/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'  # Replace with your actual token

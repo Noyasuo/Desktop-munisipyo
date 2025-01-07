@@ -32,7 +32,7 @@ class ListScreen(tk.Frame):
         self.table = ttk.Treeview(
             table_frame,
             style="Custom.Treeview",
-            columns=("name", "email", "request_date", "quantity", "price", "product", "decision"),
+            columns=("name", "email", "request_date", "quantity", "product", "decision"),
             show="headings"
         )
 
@@ -41,15 +41,13 @@ class ListScreen(tk.Frame):
         self.table.heading("email", text="Email")
         self.table.heading("request_date", text="Request Date")
         self.table.heading("quantity", text="Quantity")
-        self.table.heading("price", text="Price")
-        self.table.heading("product", text="Product")
+        self.table.heading("product", text="Item")
         self.table.heading("decision", text="Decision")
 
         self.table.column("name", width=120)
         self.table.column("email", width=180)
         self.table.column("request_date", width=100)
         self.table.column("quantity", width=70, anchor="center")
-        self.table.column("price", width=80, anchor="center")
         self.table.column("product", width=120)
         self.table.column("decision", width=100, anchor="center")
 
@@ -68,7 +66,7 @@ class ListScreen(tk.Frame):
         from login import TOKEN
 
         """Populate the table with order data from the API."""
-        url = "http://127.0.0.1:8000/api/orders/"
+        url = "http://52.62.183.28/api/orders/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'  # Replace with your actual token
@@ -91,10 +89,9 @@ class ListScreen(tk.Frame):
                         status = order['final_status']
                         # Assuming product is an array (multiple products in an order)
                         product_names = ', '.join([product['title'] for product in order['product']])
-                        product_prices = ', '.join([str(product['price']) for product in order['product']])
 
                         # Insert data into the table
-                        self.table.insert("", "end", values=( user_name, user_email, request_date, quantity, f"${product_prices}", product_names, status))
+                        self.table.insert("", "end", values=(user_name, user_email, request_date, quantity, product_names, status))
             else:
                 # If the request fails, show an error message
                 messagebox.showerror("Error", "Failed to retrieve orders data.")
