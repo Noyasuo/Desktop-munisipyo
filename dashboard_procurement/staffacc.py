@@ -12,7 +12,7 @@ class StaffAccountsScreen(tk.Frame):
 
     def create_widgets(self):
         # Title label for Staff Accounts
-        tk.Label(self, text="Staff Accounts Management", font=("Arial", 16, "bold"), bg="lightgrey").pack(pady=20)
+        tk.Label(self, text="Accounts Management", font=("Arial", 16, "bold"), bg="lightgrey").pack(pady=20)
 
         # Frame for the table and scrollbar
         table_frame = tk.Frame(self)

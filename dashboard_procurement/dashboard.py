@@ -22,7 +22,6 @@ class DashboardScreen(tk.Frame):
             ("Dashboard", self.show_dashboard),
             ("Request", self.show_request),
             ("List", self.show_list),
-            ("Request Product", self.show_request_product),
             ("Accounts", self.show_staff_accounts),
             ("Inventory", self.show_inventory),
             ("Logout", self.on_logout)
@@ -83,12 +82,6 @@ class DashboardScreen(tk.Frame):
         self.clear_content_frame()
         list_screen = ListScreen(self.content_frame)
         list_screen.pack(fill="both", expand=True)
-
-    def show_request_product(self):
-        from .request_product import RequestProductScreen
-        self.clear_content_frame()
-        request_product_screen = RequestProductScreen(self.content_frame)
-        request_product_screen.pack(fill="both", expand=True)
 
     def show_staff_accounts(self):
         from .staffacc import StaffAccountsScreen
