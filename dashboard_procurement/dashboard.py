@@ -55,18 +55,19 @@ class DashboardScreen(tk.Frame):
         self.show_dashboard()
 
     def show_dashboard(self):
-        """Displays the default dashboard view with three clickable widgets."""
+        """Displays the default dashboard view with four clickable widgets."""
         self.clear_content_frame()
 
         # Centering frame for the widgets
         center_frame = tk.Frame(self.content_frame, bg="lightgrey")
         center_frame.pack(pady=20, expand=True)
 
-        # Widgets for Request, Approved, and Declined with routing functionality
+        # Widgets for Request, Approved, Declined, and Dispatched with routing functionality
         widget_data = [
             ("Request", "This is the request widget", self.show_request),
             ("Approved", "This is the approved widget", self.show_approved),
-            ("Declined", "This is the declined widget", self.show_declined)
+            ("Declined", "This is the declined widget", self.show_declined),
+            ("Dispatched", "This is the dispatched widget", self.show_dispatched)  # Added Dispatched widget
         ]
 
         for title, description, command in widget_data:
@@ -93,6 +94,12 @@ class DashboardScreen(tk.Frame):
         self.clear_content_frame()
         declined_screen = DisapprovedScreen(self.content_frame)
         declined_screen.pack(fill="both", expand=True)
+
+    def show_dispatched(self):
+        from .dispatched import DispatchedScreen
+        self.clear_content_frame()
+        dispatched_screen = DispatchedScreen(self.content_frame)
+        dispatched_screen.pack(fill="both", expand=True)
 
     def show_list(self):
         self.clear_content_frame()
