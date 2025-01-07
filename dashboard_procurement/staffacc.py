@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox
 import requests
 from login import TOKEN
 
-
 class StaffAccountsScreen(tk.Frame):
     def __init__(self, master):
         super().__init__(master, bg="lightgrey")
@@ -58,7 +57,7 @@ class StaffAccountsScreen(tk.Frame):
 
     def populate_table(self):
         """Fetch account data from the API and populate the table."""
-        url = "http://127.0.0.1:8000/api/accounts/"
+        url = "http://52.62.183.28/api/accounts/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'
@@ -83,9 +82,9 @@ class StaffAccountsScreen(tk.Frame):
                             account["first_name"] + " " + account["last_name"],
                             account["email"],
                             account["address"],
-                            account["contact_number"],
-                            account["id_number"],
-                            account["position"],  # Example field for superuser status
+                            account["mobile_number"] if account["mobile_number"] else "",  # Use mobile_number
+                            account["id_number"] if account["id_number"] else "",  # Handle null id_number
+                            account["position"],
                             account["username"],
                             "********"
                         )

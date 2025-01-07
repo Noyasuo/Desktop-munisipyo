@@ -1,5 +1,6 @@
 import tkinter as tk
 from .list import ListScreen  # Import ListScreen from list.py
+from .reports import ReportsScreen  # Import ReportsScreen from reports.py
 
 class DashboardScreen(tk.Frame):
     def __init__(self, master, on_logout):
@@ -20,10 +21,10 @@ class DashboardScreen(tk.Frame):
         # Menu items for the sidebar
         menu_items = [
             ("Dashboard", self.show_dashboard),
-            ("Request", self.show_request),
             ("List", self.show_list),
             ("Accounts", self.show_staff_accounts),
             ("Inventory", self.show_inventory),
+            ("Reports", self.show_reports),  # Added Reports menu item
             ("Logout", self.on_logout)
         ]
 
@@ -121,6 +122,12 @@ class DashboardScreen(tk.Frame):
         self.clear_content_frame()
         view_inventory_screen = ViewInventoryScreen(self.content_frame)
         view_inventory_screen.pack(fill="both", expand=True)
+
+    def show_reports(self):
+        """Displays the Reports screen."""
+        self.clear_content_frame()
+        reports_screen = ReportsScreen(self.content_frame)
+        reports_screen.pack(fill="both", expand=True)
 
     def clear_content_frame(self):
         for widget in self.content_frame.winfo_children():
