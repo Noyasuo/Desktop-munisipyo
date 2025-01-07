@@ -32,24 +32,18 @@ class InsertInventoryScreen(tk.Frame):
         self.image_button = tk.Button(card_frame, text="Choose File", command=self.select_image, font=("Arial", 10))
         self.image_button.grid(row=3, column=1, sticky="w", padx=10, pady=5)
 
-        # Product Price
-        tk.Label(card_frame, text="Product Price", bg="white", font=("Arial", 12)).grid(row=4, column=0, sticky="e", padx=10, pady=5)
-        self.product_price_entry = tk.Entry(card_frame, font=("Arial", 12), width=30)
-        self.product_price_entry.grid(row=4, column=1, padx=10, pady=5)
-
         # Quantity
-        tk.Label(card_frame, text="Quantity", bg="white", font=("Arial", 12)).grid(row=5, column=0, sticky="e", padx=10, pady=5)
+        tk.Label(card_frame, text="Quantity", bg="white", font=("Arial", 12)).grid(row=4, column=0, sticky="e", padx=10, pady=5)
         self.quantity_entry = tk.Entry(card_frame, font=("Arial", 12), width=10)
-        self.quantity_entry.grid(row=5, column=1, padx=10, pady=5, sticky="w")
+        self.quantity_entry.grid(row=4, column=1, padx=10, pady=5, sticky="w")
 
         # Insert Product Button (Initially disabled)
         self.insert_product_button = tk.Button(card_frame, text="Insert Product", font=("Arial", 12), command=self.insert_product, state="disabled")
-        self.insert_product_button.grid(row=6, column=0, columnspan=2, pady=20)
+        self.insert_product_button.grid(row=5, column=0, columnspan=2, pady=20)
 
         # Bind events to update button state whenever any field is modified
         self.product_title_entry.bind("<KeyRelease>", self.check_fields)
         self.categories_combobox.bind("<<ComboboxSelected>>", self.check_fields)
-        self.product_price_entry.bind("<KeyRelease>", self.check_fields)
         self.quantity_entry.bind("<KeyRelease>", self.check_fields)
 
     def select_image(self):
@@ -64,7 +58,6 @@ class InsertInventoryScreen(tk.Frame):
         if (self.product_title_entry.get().strip() and
             self.categories_combobox.get() != "Select Categories" and
             self.image_path_label.cget("text") != "No file chosen" and
-            self.product_price_entry.get().strip() and
             self.quantity_entry.get().strip()):
             self.insert_product_button.config(state="normal")  # Enable button
         else:
@@ -75,14 +68,12 @@ class InsertInventoryScreen(tk.Frame):
         product_title = self.product_title_entry.get()
         category = self.categories_combobox.get()
         image_path = self.image_path_label.cget("text")
-        product_price = self.product_price_entry.get()
         quantity = self.quantity_entry.get()
 
         # Handle form submission (e.g., save to database)
         print("Product Title:", product_title)
         print("Category:", category)
         print("Image Path:", image_path)
-        print("Product Price:", product_price)
         print("Quantity:", quantity)
         
         # Display a success message

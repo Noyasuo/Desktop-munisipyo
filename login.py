@@ -119,7 +119,7 @@ class LoginScreen(tk.Frame):
 
             # Send a POST request to the login endpoint
             try:
-                response = requests.post("http://127.0.0.1:8000/api/login/", json=payload)
+                response = requests.post("http://52.62.183.28/api/login/", json=payload)
                 
                 # Check if login was successful
                 if response.status_code == 200:

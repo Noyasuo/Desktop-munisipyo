@@ -23,7 +23,7 @@ class DashboardScreen(tk.Frame):
             ("Request", self.show_request),
             ("List", self.show_list),
             ("Request Product", self.show_request_product),
-            ("Staff Accounts", self.show_staff_accounts),
+            ("Accounts", self.show_staff_accounts),
             ("Inventory", self.show_inventory),
             ("Logout", self.on_logout)
         ]
