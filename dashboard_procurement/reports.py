@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import requests
 
 class ReportsScreen(tk.Frame):
     def __init__(self, master):
@@ -86,19 +87,17 @@ class ReportsScreen(tk.Frame):
         self.table = ttk.Treeview(
             table_frame,
             style="Custom.Treeview",
-            columns=("insert_by", "product", "quantity", "barcode", "date"),
+            columns=("item", "quantity", "barcode", "date"),
             show="headings"
         )
 
         # Define headings and column widths
-        self.table.heading("insert_by", text="Insert By")
-        self.table.heading("product", text="Product")
+        self.table.heading("item", text="Item")
         self.table.heading("quantity", text="Quantity")
         self.table.heading("barcode", text="Barcode")
         self.table.heading("date", text="Date")
 
-        self.table.column("insert_by", width=120)
-        self.table.column("product", width=180)
+        self.table.column("item", width=180)
         self.table.column("quantity", width=70, anchor="center")
         self.table.column("barcode", width=120)
         self.table.column("date", width=100, anchor="center")
@@ -125,28 +124,41 @@ class ReportsScreen(tk.Frame):
             messagebox.showwarning("Warning", "Please select all fields to generate the report.")
 
     def populate_table(self, report_type, from_month, from_year, to_month, to_year):
-        """Populate the table with sample data."""
+        """Populate the table with data from the API."""
         # Clear existing entries in the table
         for item in self.table.get_children():
             self.table.delete(item)
 
-        # Sample data
-        sample_data = [
-            {"insert_by": "User1", "product": "Product1", "quantity": 10, "barcode": "1234567890", "date": "2023-01-01"},
-            {"insert_by": "User2", "product": "Product2", "quantity": 5, "barcode": "0987654321", "date": "2023-02-01"},
-            {"insert_by": "User3", "product": "Product3", "quantity": 15, "barcode": "1122334455", "date": "2023-03-01"},
-            {"insert_by": "User4", "product": "Product4", "quantity": 20, "barcode": "5566778899", "date": "2023-04-01"},
-        ]
+        if report_type == "Inserted":
+            from login import TOKEN  # Import TOKEN here to avoid circular import
+            url = "http://52.62.183.28/api/products/"
+            headers = {
+                'accept': 'application/json',
+                'Authorization': f'Token {TOKEN}'  # Replace with your actual token
+            }
 
-        for record in sample_data:
-            insert_by = record['insert_by']
-            product = record['product']
-            quantity = record['quantity']
-            barcode = record['barcode']
-            date = record['date']
+            try:
+                # Make the GET request to the API
+                response = requests.get(url, headers=headers)
+                
+                # Check if the request was successful
+                if response.status_code == 200:
+                    data = response.json()  # Parse the JSON response
+                    
+                    for product in data:
+                        item_name = product['title']
+                        quantity = product['stock']
+                        barcode = product['barcode']
+                        date = product['date']
 
-            # Insert data into the table
-            self.table.insert("", "end", values=(insert_by, product, quantity, barcode, date))
+                        # Insert data into the table
+                        self.table.insert("", "end", values=(item_name, quantity, barcode, date))
+                else:
+                    # If the request fails, show an error message
+                    messagebox.showerror("Error", "Failed to retrieve products data.")
+            except Exception as e:
+                # If any exception occurs, show an error message
+                messagebox.showerror("Error", f"An error occurred: {e}")
 
 if __name__ == "__main__":
     root = tk.Tk()

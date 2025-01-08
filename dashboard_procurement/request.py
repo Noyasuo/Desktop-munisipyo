@@ -21,18 +21,20 @@ class RequestScreen(tk.Frame):
         # Table (Treeview widget) with custom style
         self.table = ttk.Treeview(
             table_frame,
-            columns=("user_name", "user_email", "request_date", "quantity", "item", "status"),
+            columns=("order_id", "user_name", "user_email", "request_date", "quantity", "item", "status"),
             show="headings"
         )
 
         # Define headings and column widths
+        self.table.heading("order_id", text="Order ID")
         self.table.heading("user_name", text="User Name")
         self.table.heading("user_email", text="User Email")
         self.table.heading("request_date", text="Request Date")
         self.table.heading("quantity", text="Quantity")
         self.table.heading("item", text="Item")
         self.table.heading("status", text="Status")
-
+        
+        self.table.column("order_id", width=120)
         self.table.column("user_name", width=120)
         self.table.column("user_email", width=180)
         self.table.column("request_date", width=100)
@@ -83,19 +85,20 @@ class RequestScreen(tk.Frame):
                 data = response.json()  # Parse the JSON response
                 
                 for order in data:
+                    # Extract relevant data from the order object
                     if not order['status'] == 'pending':
                         continue
-                    # Extract relevant data from the order object
                     user_name = order['user']['username']  # Assuming 'user' is an ID or object, you can modify this to fetch user details
                     user_email = order['user']['email']  # Same as above, replace with actual user email if nested
                     request_date = order['request_date']
                     quantity = order['quantity']
                     status = order['status']
+                    order_id = order['id']
                     # Assuming product is an array (multiple products in an order)
                     item_names = ', '.join([product['title'] for product in order['product']])
 
                     # Insert data into the table
-                    self.table.insert("", "end", values=(user_name, user_email, request_date, quantity, item_names, status))
+                    self.table.insert("", "end", values=(order_id, user_name, user_email, request_date, quantity, item_names, status))
             else:
                 # If the request fails, show an error message
                 messagebox.showerror("Error", "Failed to retrieve orders data.")
@@ -114,7 +117,31 @@ class RequestScreen(tk.Frame):
 
     def approve_request(self):
         """Approve the selected request."""
-        # Your existing code for approving the request
+        selected_item = self.table.selection()
+        if selected_item:
+            item_data = self.table.item(selected_item)["values"]
+            order_id = item_data[0]  # Assuming the first column is the order ID
+
+            url = f"http://52.62.183.28/api/order/{order_id}/"
+            headers = {
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': f'Token {TOKEN}'
+            }
+            data = {
+                "status": "approved",
+                "final_status": "approved"
+            }
+
+            try:
+                response = requests.put(url, headers=headers, json=data)
+                if response.status_code == 200:
+                    messagebox.showinfo("Success", "Order approved successfully.")
+                    # Optionally, refresh the table or update the UI
+                else:
+                    messagebox.showerror("Error", f"Failed to approve order: {response.status_code}")
+            except requests.exceptions.RequestException as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
 
     def decline_request(self):
         """Decline the selected request."""
