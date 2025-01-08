@@ -149,13 +149,45 @@ class ReportsScreen(tk.Frame):
                         item_name = product['title']
                         quantity = product['stock']
                         barcode = product['barcode']
-                        date = product['date']
+                        date = product['created_at']
 
                         # Insert data into the table
                         self.table.insert("", "end", values=(item_name, quantity, barcode, date))
                 else:
                     # If the request fails, show an error message
                     messagebox.showerror("Error", "Failed to retrieve products data.")
+            except Exception as e:
+                # If any exception occurs, show an error message
+                messagebox.showerror("Error", f"An error occurred: {e}")
+
+        elif report_type == "Dispatched":
+            from login import TOKEN  # Import TOKEN here to avoid circular import
+            url = "http://52.62.183.28/api/orders/"
+            headers = {
+                'accept': 'application/json',
+                'Authorization': f'Token {TOKEN}'  # Replace with your actual token
+            }
+
+            try:
+                # Make the GET request to the API
+                response = requests.get(url, headers=headers)
+                
+                # Check if the request was successful
+                if response.status_code == 200:
+                    data = response.json()  # Parse the JSON response
+                    
+                    for order in data:
+                        if order['status'] == 'dispatch':
+                            item_name = order['product']['title']
+                            quantity = order['product']['stock']
+                            barcode = order['product']['barcode']
+                            date = order['created_at']
+
+                            # Insert data into the table
+                            self.table.insert("", "end", values=(item_name, quantity, barcode, date))
+                else:
+                    # If the request fails, show an error message
+                    messagebox.showerror("Error", "Failed to retrieve orders data.")
             except Exception as e:
                 # If any exception occurs, show an error message
                 messagebox.showerror("Error", f"An error occurred: {e}")
