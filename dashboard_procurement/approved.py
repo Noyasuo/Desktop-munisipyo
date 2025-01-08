@@ -34,11 +34,11 @@ class ApprovedScreen(tk.Frame):
         table_frame.pack(padx=20, pady=10, fill="both", expand=True)
 
         # Create the Treeview widget for the table
-        self.tree = ttk.Treeview(table_frame, columns=("Order Id", "Name", "Email", "Request Date", "Quantity", "Item"), show="headings", style="Custom.Treeview")
+        self.tree = ttk.Treeview(table_frame, columns=("Order Id", "Name", "Email", "Request Date", "Quantity", "Item", "Barcode"), show="headings", style="Custom.Treeview")
 
         # Define the headings and configure their styles
-        headings = ["Order Id", "Name", "Email", "Request Date", "Quantity", "Item"]
-        column_widths = [120, 150, 120, 100, 150]  # Adjusted widths for each column
+        headings = ["Order Id", "Name", "Email", "Request Date", "Quantity", "Item", "Barcode"]
+        column_widths = [120, 150, 120, 100, 150, 150]  # Adjusted widths for each column
 
         for col, width in zip(headings, column_widths):
             self.tree.heading(col, text=col)
@@ -89,12 +89,13 @@ class ApprovedScreen(tk.Frame):
                         user_email = order['user']['email']  # Same as above, replace with actual user email if nested
                         request_date = order['request_date']
                         quantity = order['quantity']
-                        order_id =  order['id']
+                        order_id = order['id']
                         # Assuming product is an array (multiple products in an order)
                         item_names = ', '.join([product['title'] for product in order['product']])
+                        barcodes = ', '.join([product['barcode'] for product in order['product']])
 
                         # Insert data into the table
-                        self.tree.insert("", "end", values=(order_id, user_name, user_email, request_date, quantity, item_names))
+                        self.tree.insert("", "end", values=(order_id, user_name, user_email, request_date, quantity, item_names, barcodes))
             else:
                 # If the request fails, show an error message
                 messagebox.showerror("Error", "Failed to retrieve orders data.")
@@ -116,15 +117,15 @@ class ApprovedScreen(tk.Frame):
         if selected_item:
             # Get the selected item values
             item_values = self.tree.item(selected_item)['values']
-            order_id, user_name, user_email, request_date, quantity, item_names = item_values
-            barcode = ""
+            order_id, user_name, user_email, request_date, quantity, item_names, barcodes = item_values
+
             # Create a frame for dispatch details
             dispatch_frame = tk.Frame(self, bg="lightgrey")
             dispatch_frame.pack(pady=20)
 
             # Create and place labels and entry widgets for each field
             fields = ["Name", "Email", "Request Date", "Quantity", "Item", "Barcode"]
-            values = [user_name, user_email, request_date, quantity, item_names, barcode]
+            values = [user_name, user_email, request_date, quantity, item_names, barcodes]
             entries = {}
 
             for i, (field, value) in enumerate(zip(fields, values)):
