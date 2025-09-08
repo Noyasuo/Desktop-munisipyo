@@ -68,7 +68,8 @@ class ApprovedScreen(tk.Frame):
 
     def populate_table(self):
         """Populate the table with order data from the API."""
-        url = "http://52.62.183.28/api/orders/"
+        from config import API_BASE_URL
+        url = f"{API_BASE_URL}/api/orders/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'  # Replace with your actual token
@@ -192,7 +193,7 @@ class ApprovedScreen(tk.Frame):
         print(f"Dispatching request for item: {entries} {order_id}")
 
         # Update the final_status to "dispatch" using the endpoint
-        url = f"http://52.62.183.28/api/order/{order_id}/"
+        url = f"http://localhost:8000/api/order/{order_id}/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}',  # Replace with your actual token

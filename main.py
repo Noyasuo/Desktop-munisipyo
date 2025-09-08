@@ -82,7 +82,7 @@ class MainApplication(tk.Tk):
         self.header.create_user_info(username)
 
         # Load and display the DashboardScreen
-        from dashboard import DashboardScreen  # Import inside function to avoid circular imports
+        from dashboard_procurement.dashboard import DashboardScreen  # Import inside function to avoid circular imports
         dashboard_screen = DashboardScreen(self.content_frame, self.logout)
         dashboard_screen.pack(expand=True, fill="both")
 

@@ -64,10 +64,10 @@ class DashboardScreen(tk.Frame):
 
         # Widgets for Request, Approved, Declined, and Dispatched with routing functionality
         widget_data = [
-            ("Request", "This is the request widget", self.show_request),
-            ("Approved", "This is the approved widget", self.show_approved),
-            ("Declined", "This is the declined widget", self.show_declined),
-            ("Dispatched", "This is the dispatched widget", self.show_dispatched)  # Added Dispatched widget
+            ("Request", "Click to see requests", self.show_request),
+            ("Approved", "Click to see approved requests", self.show_approved),
+            ("Declined", "Click to see declined requests", self.show_declined),
+            ("Dispatched", "Click to see dispatched requests", self.show_dispatched)  # Added Dispatched widget
         ]
 
         for title, description, command in widget_data:

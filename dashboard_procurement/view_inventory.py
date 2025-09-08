@@ -51,7 +51,8 @@ class ViewInventoryScreen(tk.Frame):
         self.populate_table(inventory_data)
 
     def fetch_inventory_data(self):
-        url = 'http://52.62.183.28/api/products/'
+        from config import API_BASE_URL
+        url = f'{API_BASE_URL}/api/products/'
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'

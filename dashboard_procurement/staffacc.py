@@ -47,7 +47,8 @@ class StaffAccountsScreen(tk.Frame):
 
     def populate_table(self):
         """Fetch account data from the API and populate the table."""
-        url = "http://52.62.183.28/api/accounts/"
+        from config import API_BASE_URL
+        url = f"{API_BASE_URL}/api/accounts/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'

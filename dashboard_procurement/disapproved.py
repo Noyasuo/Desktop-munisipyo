@@ -1,5 +1,7 @@
 import tkinter as tk
-from tkinter import ttk
+from tk    def create_widgets(self):
+        # Title label for Disapproved Request Screen
+        tk.Label(self, text="Disapproved Requests", font=("Arial", 16, "bold")).pack(pady=20) ttk
 import requests
 from tkinter import messagebox
 from login import TOKEN
@@ -28,8 +30,17 @@ class DisapprovedScreen(tk.Frame):
                   foreground=[("selected", "white")])    # Selected row text color
 
     def create_widgets(self):
-        # Title label for Disapproved Request Screen
-        tk.Label(self, text="Disapproved Requests", font=("Arial", 16, "bold")).pack(pady=20)
+        # Top frame for header
+        top_frame = tk.Frame(self)
+        top_frame.pack(fill="x", padx=20)
+        
+        # Title label (left side)
+        tk.Label(top_frame, text="Disapproved Requests", font=("Arial", 16, "bold")).pack(side="left", pady=20)
+        
+        # Username label (right side)
+        from token_utils import get_username
+        username = get_username()
+        tk.Label(top_frame, text=f"User: {username}", font=("Arial", 10, "bold")).pack(side="right", pady=20)
 
         # Frame for the table and scrollbar
         table_frame = tk.Frame(self)  # Set background color for the frame
@@ -58,7 +69,8 @@ class DisapprovedScreen(tk.Frame):
 
     def populate_table(self):
         """Populate the table with order data from the API."""
-        url = "http://52.62.183.28/api/orders/"
+        from config import API_BASE_URL
+        url = f"{API_BASE_URL}/api/orders/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'  # Replace with your actual token

@@ -131,7 +131,7 @@ class ReportsScreen(tk.Frame):
 
         if report_type == "Inserted":
             from login import TOKEN  # Import TOKEN here to avoid circular import
-            url = "http://52.62.183.28/api/products/"
+            url = "http://localhost:8000/api/products/"
             headers = {
                 'accept': 'application/json',
                 'Authorization': f'Token {TOKEN}'  # Replace with your actual token
@@ -162,7 +162,7 @@ class ReportsScreen(tk.Frame):
 
         elif report_type == "Dispatched":
             from login import TOKEN  # Import TOKEN here to avoid circular import
-            url = "http://52.62.183.28/api/orders/"
+            url = "http://localhost:8000/api/orders/"
             headers = {
                 'accept': 'application/json',
                 'Authorization': f'Token {TOKEN}'  # Replace with your actual token

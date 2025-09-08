@@ -66,7 +66,8 @@ class ListScreen(tk.Frame):
         from login import TOKEN
 
         """Populate the table with order data from the API."""
-        url = "http://52.62.183.28/api/orders/"
+        from config import API_BASE_URL
+        url = f"{API_BASE_URL}/api/orders/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'  # Replace with your actual token

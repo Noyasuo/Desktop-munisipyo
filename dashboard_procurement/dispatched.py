@@ -21,8 +21,17 @@ class DispatchedScreen(tk.Frame):
                   foreground=[("selected", "white")])    # Selected row text color
 
     def create_widgets(self):
-        # Title label
-        tk.Label(self, text="Dispatched Screen", font=("Arial", 16), bg="lightgrey").pack(pady=20)
+        # Top frame for header
+        top_frame = tk.Frame(self, bg="lightgrey")
+        top_frame.pack(fill="x", padx=20)
+        
+        # Title label (left side)
+        tk.Label(top_frame, text="Dispatched Screen", font=("Arial", 16), bg="lightgrey").pack(side="left", pady=20)
+        
+        # Username label (right side)
+        from token_utils import get_username
+        username = get_username()
+        tk.Label(top_frame, text=f"User: {username}", bg="lightgrey", font=("Arial", 10, "bold")).pack(side="right", pady=20)
 
         # Create a frame for the table
         table_frame = tk.Frame(self, bg="lightgrey")
@@ -66,7 +75,8 @@ class DispatchedScreen(tk.Frame):
         from login import TOKEN
 
         """Populate the table with order data from the API."""
-        url = "http://52.62.183.28/api/orders/"
+        from config import API_BASE_URL
+        url = f"{API_BASE_URL}/api/orders/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'  # Replace with your actual token

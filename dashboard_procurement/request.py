@@ -21,7 +21,7 @@ class RequestScreen(tk.Frame):
         # Table (Treeview widget) with custom style
         self.table = ttk.Treeview(
             table_frame,
-            columns=("order_id", "user_name", "user_email", "request_date", "quantity", "item", "status"),
+            columns=("order_id", "user_name", "user_email", "request_date", "quantity", "item", "status", "product_id", "product_qty"),
             show="headings"
         )
 
@@ -33,6 +33,8 @@ class RequestScreen(tk.Frame):
         self.table.heading("quantity", text="Quantity")
         self.table.heading("item", text="Item")
         self.table.heading("status", text="Status")
+        self.table.heading("product_id", text="Product ID")
+        self.table.heading("product_qty", text="Product Quantity")
         
         self.table.column("order_id", width=120)
         self.table.column("user_name", width=120)
@@ -41,6 +43,9 @@ class RequestScreen(tk.Frame):
         self.table.column("quantity", width=70, anchor="center")
         self.table.column("item", width=180)
         self.table.column("status", width=100, anchor="center")
+        self.table.column("product_id", width=100, anchor="center")
+        self.table.column("product_qty", width=100, anchor="center")
+
 
         # Add vertical scrollbar for the table
         scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.table.yview)
@@ -70,7 +75,7 @@ class RequestScreen(tk.Frame):
 
     def populate_table(self):
         """Populate the table with order data from the API."""
-        url = "http://52.62.183.28/api/orders/"
+        url = "http://localhost:8000/api/orders/"
         headers = {
             'accept': 'application/json',
             'Authorization': f'Token {TOKEN}'  # Replace with your actual token
@@ -84,21 +89,28 @@ class RequestScreen(tk.Frame):
             if response.status_code == 200:
                 data = response.json()  # Parse the JSON response
                 
+                # Clear existing entries in the table
+                for item in self.table.get_children():
+                    self.table.delete(item)
+                
                 for order in data:
                     # Extract relevant data from the order object
-                    if not order['status'] == 'pending':
+                    if order['status'] != 'pending':
                         continue
-                    user_name = order['user']['username']  # Assuming 'user' is an ID or object, you can modify this to fetch user details
-                    user_email = order['user']['email']  # Same as above, replace with actual user email if nested
-                    request_date = order['request_date']
+                    user_name = order['user']['username']  # Assuming 'user' is an object
+                    user_email = order['user']['email']  # Assuming 'user' is an object
+                    request_date = order['request_date']  # Assuming 'created_at' is the request date
                     quantity = order['quantity']
                     status = order['status']
                     order_id = order['id']
+                    product_id = order['product'][0]["id"]
+                    product_qty = order['product'][0]["stock"]
+                    
                     # Assuming product is an array (multiple products in an order)
                     item_names = ', '.join([product['title'] for product in order['product']])
 
                     # Insert data into the table
-                    self.table.insert("", "end", values=(order_id, user_name, user_email, request_date, quantity, item_names, status))
+                    self.table.insert("", "end", values=(order_id, user_name, user_email, request_date, quantity, item_names, status, product_id, product_qty))
             else:
                 # If the request fails, show an error message
                 messagebox.showerror("Error", "Failed to retrieve orders data.")
@@ -121,8 +133,12 @@ class RequestScreen(tk.Frame):
         if selected_item:
             item_data = self.table.item(selected_item)["values"]
             order_id = item_data[0]  # Assuming the first column is the order ID
+            order_name = item_data[5]
+            product_id = item_data[7]
+            product_qty = item_data[8]
 
-            url = f"http://52.62.183.28/api/order/{order_id}/"
+            from config import API_BASE_URL
+            url = f"{API_BASE_URL}/api/order/{order_id}/"
             headers = {
                 'accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -136,8 +152,29 @@ class RequestScreen(tk.Frame):
             try:
                 response = requests.put(url, headers=headers, json=data)
                 if response.status_code == 200:
+                                # Step 1: Update the product details
+                    product_url = f"{API_BASE_URL}/api/products/{product_id}/"
+                    product_data = {
+                        "stock": int(product_qty) - 1,
+                        "title": order_name
+                    }
+                    product_headers = {
+                        'accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': f'Token {TOKEN}',
+                    }
+
+                    try:
+                        product_response = requests.put(product_url, headers=product_headers, json=product_data)
+                        print(product_response.text)
+                        if product_response.status_code != 200:
+                            raise Exception(f"Failed to update product: {product_response.status_code}")
+                    except requests.exceptions.RequestException as e:
+                        messagebox.showerror("Error", f"An error occurred while updating the product: {e}")
+                        return
                     messagebox.showinfo("Success", "Order approved successfully.")
-                    # Optionally, refresh the table or update the UI
+                    # Refresh the table
+                    self.populate_table()
                 else:
                     messagebox.showerror("Error", f"Failed to approve order: {response.status_code}")
             except requests.exceptions.RequestException as e:
@@ -153,11 +190,36 @@ class RequestScreen(tk.Frame):
         """Updates the status of the selected row."""
         selected_item = self.table.selection()
         if selected_item:
-            # Update the status in the table
-            self.table.set(selected_item, column="status", value=status)
+            item_data = self.table.item(selected_item)["values"]
+            order_id = item_data[0] 
+            from config import API_BASE_URL
+            url = f"{API_BASE_URL}/api/order/{order_id}/"
+            headers = {
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': f'Token {TOKEN}'
+            }
+            data = {
+                "status": status,
+                "final_status": status
+            }
+
+            try:
+                response = requests.put(url, headers=headers, json=data)
+                if response.status_code == 200:
+                    messagebox.showinfo("Success", f"Order {status} successfully.")
+                    # Refresh the table
+                    self.populate_table()
+                else:
+                    messagebox.showerror("Error", f"Failed to update order: {response.status_code}")
+            except requests.exceptions.RequestException as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
+                
+
             # Optionally handle the comment (e.g., send it to the server or log it)
             if comment:
                 print(f"Comment for declined request: {comment}")
+
             # Disable the action buttons
             self.approve_button.config(state="disabled")
             self.decline_button.config(state="disabled")

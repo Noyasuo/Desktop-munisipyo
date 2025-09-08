@@ -119,7 +119,7 @@ class LoginScreen(tk.Frame):
 
             # Send a POST request to the login endpoint
             try:
-                response = requests.post("http://52.62.183.28/api/login/", json=payload)
+                response = requests.post("http://localhost:8000/api/login/", json=payload)
                 
                 # Check if login was successful
                 if response.status_code == 200:
@@ -132,29 +132,21 @@ class LoginScreen(tk.Frame):
                     
                     # Print login message
                     print(message)
-
                     print(user_type)
-                    # Check if user_type is procurement_admin
-                    if user_type == "municipal_admin":
+                    
+                    # Save token for all successful logins
+                    save_token(token=token, username=username)
+
+                    # Call the login success callback with the username
+                    if self.on_login_success:
                         self.on_login_success(username)
-                        save_token(token=token, username=username)
-                    else:
-                        for widget in self.master.winfo_children():
-                            widget.destroy()
-                            
-                        # Display the user's information in the header
-                        self.master.master.header.create_user_info(username)
-
-                        if user_type == "procurement_admin":
-                            # Load and display the DashboardScreen
-                            dashboard_screen = DashboardScreen(self.master, self.master.master.logout)
-                            dashboard_screen.pack(expand=True, fill="both")
-                            save_token(token=token, username=username)
-
-                        elif user_type == "supplier":
-                            dashboard_screen = DashboardScreenSupplier(self.master)
-                            dashboard_screen.pack(expand=True, fill="both")
-                            save_token(token=token, username=username)
+                        
+                    # Handle different user types
+                    if user_type == "procurement_admin":
+                        print("Logged in as procurement admin")
+                    elif user_type == "supplier":
+                        print("Logged in as supplier")
+                        dashboard_screen.pack(expand=True, fill="both")
                         
 
                 else:
