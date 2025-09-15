@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 import os
 from .list import ListScreen  # Import ListScreen from list.py
 from .reports import ReportsScreen  # Import ReportsScreen from reports.py
+from .profile import ProfileScreen  # Import ProfileScreen
 
 class DashboardScreen(tk.Frame):
     def __init__(self, master, on_logout):
@@ -27,8 +28,8 @@ class DashboardScreen(tk.Frame):
             ("List", self.show_list),
             ("Accounts", self.show_staff_accounts),
             ("Inventory", self.show_inventory),
-            ("Reports", self.show_reports),  # Added Reports menu item
-            ("Logout", self.on_logout)
+            ("Reports", self.show_reports),
+            ("Profile", self.show_profile)  # Replaced Logout with Profile
         ]
 
         for item, command in menu_items:
@@ -150,6 +151,12 @@ class DashboardScreen(tk.Frame):
         self.clear_content_frame()
         reports_screen = ReportsScreen(self.content_frame)
         reports_screen.pack(fill="both", expand=True)
+
+    def show_profile(self):
+        """Displays the Profile screen."""
+        self.clear_content_frame()
+        profile_screen = ProfileScreen(self.content_frame, on_logout=self.on_logout)
+        profile_screen.pack(fill="both", expand=True)
 
     def clear_content_frame(self):
         for widget in self.content_frame.winfo_children():
