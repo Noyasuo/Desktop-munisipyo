@@ -14,18 +14,15 @@ class ViewInventoryScreen(tk.Frame):
     def create_widgets(self):
         tk.Label(self, text="View Inventory", font=("Arial", 16), bg="lightgrey").pack(pady=20)
         
-        # Create a frame for the table
         table_frame = tk.Frame(self, bg="lightgrey")
         table_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # Table (Treeview widget) with custom style
         self.table = ttk.Treeview(
             table_frame,
             columns=("item", "stock", "category", "barcode"),
             show="headings"
         )
 
-        # Define headings and column widths
         self.table.heading("item", text="Item")
         self.table.heading("stock", text="Stock")
         self.table.heading("category", text="Category")
@@ -36,18 +33,13 @@ class ViewInventoryScreen(tk.Frame):
         self.table.column("category", width=120)
         self.table.column("barcode", width=120)
 
-        # Add vertical scrollbar for the table
         scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.table.yview)
         self.table.configure(yscroll=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
 
-        # Pack the table into the frame
         self.table.pack(fill="both", expand=True)
 
-        # Fetching data from API
         inventory_data = self.fetch_inventory_data()
-
-        # Populate the table with inventory data
         self.populate_table(inventory_data)
 
     def fetch_inventory_data(self):
@@ -60,8 +52,8 @@ class ViewInventoryScreen(tk.Frame):
         
         try:
             response = requests.get(url, headers=headers)
-            response.raise_for_status()  # Raise an exception for HTTP errors
-            return response.json()  # Returns the list of products
+            response.raise_for_status()
+            return response.json()
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data: {e}")
             return []

@@ -11,18 +11,14 @@ class ProfileScreen(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        # Title label
         tk.Label(self, text="User Profile", font=("Arial", 16, "bold"), bg="lightgrey").pack(pady=20)
 
-        # Create a frame for the profile info with a white background and padding
         profile_frame = tk.Frame(self, bg="white", padx=30, pady=30)
         profile_frame.pack(padx=50, pady=20)
 
-        # Get user data
         self.load_user_data()
 
     def load_user_data(self):
-        """Load user data from the API"""
         from config import API_BASE_URL
         username = get_username()
         token = get_token()
@@ -37,7 +33,6 @@ class ProfileScreen(tk.Frame):
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 accounts = response.json()
-                # Find the current user's account
                 user_account = next((acc for acc in accounts if acc['username'] == username), None)
                 
                 if user_account:
@@ -50,16 +45,12 @@ class ProfileScreen(tk.Frame):
             tk.Label(self, text=f"Error: {str(e)}", fg="red").pack()
 
     def display_user_info(self, user_data):
-        """Display the user information in a formatted way"""
-        # Create a frame for the profile info
         info_frame = tk.Frame(self, bg="white", padx=40, pady=30)
         info_frame.pack(fill="x", padx=50)
 
-        # Style for the labels
         title_style = ("Arial", 12, "bold")
         value_style = ("Arial", 12)
         
-        # Create labels for each piece of information
         fields = [
             ("Name", user_data.get('name', 'N/A')),
             ("Username", user_data.get('username', 'N/A')),
@@ -71,13 +62,10 @@ class ProfileScreen(tk.Frame):
             ("Position", user_data.get('position', 'N/A'))
         ]
 
-        # Display each field
         for row, (title, value) in enumerate(fields):
-            # Create a frame for each row
             row_frame = tk.Frame(info_frame, bg="white")
             row_frame.pack(fill="x", pady=5)
 
-            # Title label (left)
             tk.Label(row_frame, 
                     text=f"{title}:", 
                     font=title_style,
@@ -85,23 +73,20 @@ class ProfileScreen(tk.Frame):
                     anchor="e",
                     bg="white").pack(side="left", padx=(0, 10))
 
-            # Value label (right)
             tk.Label(row_frame,
                     text=value,
                     font=value_style,
                     bg="white").pack(side="left")
 
-        # Add some space before the logout button
         tk.Frame(info_frame, height=30, bg="white").pack()
 
-        # Create a frame for the logout button with red background
         logout_button = tk.Button(
             info_frame,
             text="Logout",
             font=("Arial", 12, "bold"),
-            bg="#FF4444",  # Red background
-            fg="white",    # White text
-            activebackground="#CC0000",  # Darker red when clicked
+            bg="#FF4444",
+            fg="white",
+            activebackground="#CC0000",
             activeforeground="white",
             padx=30,
             pady=10,
@@ -110,11 +95,9 @@ class ProfileScreen(tk.Frame):
         logout_button.pack(pady=20)
 
     def default_logout(self):
-        """Default logout behavior if no callback is provided"""
         from tkinter import messagebox
         messagebox.showinfo("Logout", "Logout functionality not configured")
 
-# For testing the profile screen independently
 if __name__ == "__main__":
     root = tk.Tk()
     root.geometry("800x600")
